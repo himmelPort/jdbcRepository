@@ -30,7 +30,7 @@ public List<Illustration> imageList(int[] bordering) {
   и метод вызывается дважды.
   Способ отображения устанавливается в методе jdbcSelectMap(IllustrationMapper::new)
   как Supplier<M> rowMapper.
-Пример класса-отобажателя:
+Пример класса-отображателя:
 ```java
 public class IllustrationMapper implements RowMapper<Illustration> {
     @Override
