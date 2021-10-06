@@ -92,3 +92,41 @@ public List<Translator> questionsNode(String baseFilter, String idParent, String
     .paramStrDefault(contextFilter, "%%")
     .jdbcSelectMap(QuestionMapper::new);
     }
+```
+### Особенности применения
+* Библиотека тестировалась в БД postgres-13. В ней вызов процедур, возвращающих 
+набор строк, выполняется операторам select. Как, например,
+```sql
+select * from imagelist(:param1, :param2);
+```
+В среде базы данных H2 для аналогичной процедуры, называемой UDF,
+используется оператор call:
+```sql
+call imagelist(:param1, :param2);
+```
+Для учёта такой особенности используется свойсво nameProcedure, имеющее
+getter и setter. Если установить для этих разных баз данных используемое 
+значение оператора:
+```java
+// for postgres
+    jdbcRepository.setNameCommand("select * from");
+
+// for h2
+    jdbcRepository.setNameCommand("call");
+```
+то вызов процедур БД postgres и БД H2 будет выглядить одинаково:
+```java
+    jdbcRepository.procedure("schema_table")
+        .param(appSchemaTable)
+        .jdbcSelect(SchemaTableMapper::new);
+```
+* Значение поля nameProcedure не используется при вызове следующих методов:
+```java
+public <T, M> List<T> jdbcNativeQuery(String sql, Supplier<M> rowMapper)
+  and
+public void jdbcNativeQuery(String sql)
+```
+Первый метод отображает строки на объекты с помощью аргумента Supplier<M> rowMapper.
+
+Второй выполнят операции insert и update.
+    
